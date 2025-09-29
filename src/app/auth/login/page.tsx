@@ -5,15 +5,14 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { toast } from 'sonner'
-import CustomerLayout from '@/components/layout/CustomerLayout'
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { signIn, loading } = useAuth()
+  const { signIn, isLoading } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -28,10 +27,10 @@ export default function LoginPage() {
       return
     }
 
-    const { data, error } = await signIn(formData.email, formData.password)
+    const { error } = await signIn(formData.email, formData.password)
     
     if (error) {
-      toast.error(error.message || 'Login failed')
+      toast.error('Login failed')
     } else {
       toast.success('Login successful!')
       router.push('/')
@@ -163,9 +162,9 @@ export default function LoginPage() {
                   <Button 
                     type="submit" 
                     className="w-full h-12 bg-[#6b5618] hover:bg-[#5d4a15] text-white font-medium"
-                    disabled={loading}
+                    disabled={isLoading}
                   >
-                    {loading ? (
+                    {isLoading ? (
                       <div className="flex items-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                         Signing in...
@@ -210,10 +209,10 @@ export default function LoginPage() {
 
                 <div className="mt-6 text-center space-y-2">
                   <p className="text-sm text-gray-600">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <button
                       onClick={() => router.push('/auth/register')}
-                      className="font-medium text-[#6b5618] hover:text-[#5d4a15]"
+                      className="font-medium text-orange-600 hover:text-orange-500"
                     >
                       Sign up here
                     </button>

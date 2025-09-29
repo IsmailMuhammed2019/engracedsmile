@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { useBookingStore } from '@/lib/stores/booking'
-import CustomerLayout from '@/components/layout/CustomerLayout'
+import PWALayout from '@/components/layout/PWALayout'
 
 const nigerianCities = [
   'Lagos', 'Abuja', 'Kano', 'Port Harcourt', 'Ibadan', 'Kaduna', 
@@ -63,7 +63,7 @@ export default function HomePage() {
   ]
 
   return (
-    <CustomerLayout>
+    <PWALayout>
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -216,6 +216,6 @@ export default function HomePage() {
           </Button>
     </div>
       </section>
-    </CustomerLayout>
+    </PWALayout>
   )
 }

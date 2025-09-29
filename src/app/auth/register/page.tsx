@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { toast } from 'sonner'
 import PWALayout from '@/components/layout/PWALayout'
@@ -13,7 +13,7 @@ import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { signUp, loading } = useAuth()
+  const { signUp, isLoading } = useAuth()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -42,13 +42,13 @@ export default function RegisterPage() {
       return
     }
 
-    const { data, error } = await signUp(formData.email, formData.password, {
+    const { error } = await signUp(formData.email, formData.password, {
       fullName: formData.fullName,
       phoneNumber: formData.phoneNumber,
     })
     
     if (error) {
-      toast.error(error.message || 'Registration failed')
+      toast.error('Registration failed')
     } else {
       toast.success('Registration successful! Please check your email to verify your account.')
       router.push('/auth/login')
@@ -245,9 +245,9 @@ export default function RegisterPage() {
                   <Button 
                     type="submit" 
                     className="w-full h-12 bg-[#6b5618] hover:bg-[#5d4a15] text-white font-medium"
-                    disabled={loading}
+                    disabled={isLoading}
                   >
-                    {loading ? (
+                    {isLoading ? (
                       <div className="flex items-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                         Creating account...
