@@ -1,46 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarFooter, 
-  SidebarGroup, 
-  SidebarGroupContent, 
-  SidebarGroupLabel, 
-  SidebarHeader, 
-  SidebarMenu, 
-  SidebarMenuButton, 
-  SidebarMenuItem, 
-  SidebarProvider, 
-  SidebarTrigger 
-} from '@/components/ui/sidebar'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { 
   Bus, 
-  MapPin, 
   Calendar, 
   Clock, 
   Users, 
-  Settings, 
-  LogOut,
-  Home,
-  FileText,
   Plus,
   Edit,
-  Trash2,
-  Eye
+  Trash2
 } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import AdminLayout from '@/components/layout/AdminLayout'
+import Image from 'next/image'
 
 interface Route {
   id: string
@@ -88,8 +68,7 @@ interface Trip {
 }
 
 export default function AdminTripsPage() {
-  const router = useRouter()
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, requireAdmin } = useAuth()
   const [trips, setTrips] = useState<Trip[]>([])
   const [routes, setRoutes] = useState<Route[]>([])
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
@@ -97,6 +76,7 @@ export default function AdminTripsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null)
+  const requireAdminRef = useRef(requireAdmin)
 
   const [formData, setFormData] = useState({
     route_id: '',
@@ -107,19 +87,20 @@ export default function AdminTripsPage() {
     available_seats: ''
   })
 
+  // Update ref when requireAdmin changes
   useEffect(() => {
-    if (!user) {
-      router.push('/auth/login')
+    requireAdminRef.current = requireAdmin
+  }, [requireAdmin])
+
+  // Check authentication and fetch data
+  useEffect(() => {
+    if (!user || !profile?.is_admin) {
+      requireAdminRef.current()
       return
     }
-
-    if (profile && !profile.is_admin) {
-      router.push('/')
-      return
-    }
-
+    
     fetchData()
-  }, [user, profile, router])
+  }, [user, profile])
 
   const fetchData = async () => {
     try {
@@ -218,9 +199,10 @@ export default function AdminTripsPage() {
         available_seats: ''
       })
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving trip:', error)
-      toast.error(error.message || 'Failed to save trip')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save trip'
+      toast.error(errorMessage)
     }
   }
 
@@ -249,9 +231,10 @@ export default function AdminTripsPage() {
       if (error) throw error
       toast.success('Trip deleted successfully')
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting trip:', error)
-      toast.error(error.message || 'Failed to delete trip')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete trip'
+      toast.error(errorMessage)
     }
   }
 
@@ -265,109 +248,40 @@ export default function AdminTripsPage() {
       if (error) throw error
       toast.success(`Trip ${trip.is_active ? 'deactivated' : 'activated'} successfully`)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating trip status:', error)
-      toast.error(error.message || 'Failed to update trip status')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update trip status'
+      toast.error(errorMessage)
     }
   }
 
-  const handleSignOut = async () => {
-    await signOut()
-    router.push('/')
-  }
-
-  if (loading) {
+  // Show loading if still checking auth or fetching data
+  if (loading || !user || !profile?.is_admin) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-      </div>
+      <AdminLayout>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading trips...</p>
+          </div>
+        </div>
+      </AdminLayout>
     )
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full">
-        <Sidebar>
-          <SidebarHeader>
-            <div className="flex items-center gap-2 px-4 py-2">
-              <Bus className="h-6 w-6 text-orange-600" />
-              <span className="font-bold text-lg">EngracedSmile</span>
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <a href="/admin">
-                        <Home className="h-4 w-4" />
-                        <span>Overview</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <a href="/admin/vehicles">
-                        <Bus className="h-4 w-4" />
-                        <span>Vehicles</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <a href="/admin/routes">
-                        <MapPin className="h-4 w-4" />
-                        <span>Routes</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <a href="/admin/trips">
-                        <Calendar className="h-4 w-4" />
-                        <span>Trips</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <a href="/admin/bookings">
-                        <FileText className="h-4 w-4" />
-                        <span>Bookings</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut}>
-                  <LogOut className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
-        
-        <div className="flex-1 flex flex-col">
-          <header className="flex h-16 items-center gap-4 border-b bg-background px-4">
-            <SidebarTrigger />
-            <div className="flex-1">
-              <h1 className="text-2xl font-semibold">Manage Trips</h1>
-            </div>
-            <Button onClick={() => setShowForm(true)} className="bg-orange-600 hover:bg-orange-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Trip
-            </Button>
-          </header>
-          
-          <main className="flex-1 overflow-auto p-6">
+    <AdminLayout>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Manage Trips</h1>
+            <p className="text-gray-600">Create and manage trip schedules</p>
+          </div>
+          <Button onClick={() => setShowForm(true)} className="bg-primary hover:bg-primary/90">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Trip
+          </Button>
+        </div>
             {showForm && (
               <Card className="mb-6">
                 <CardHeader>
@@ -464,7 +378,7 @@ export default function AdminTripsPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
+                      <Button type="submit" className="bg-primary hover:bg-primary/90">
                         {editingTrip ? 'Update Trip' : 'Create Trip'}
                       </Button>
                       <Button type="button" variant="outline" onClick={() => {
@@ -536,10 +450,12 @@ export default function AdminTripsPage() {
                         {trip.vehicle?.images && trip.vehicle.images.length > 0 && (
                           <div className="flex gap-2 mb-4">
                             {trip.vehicle.images.slice(0, 3).map((image, index) => (
-                              <img
+                              <Image
                                 key={index}
                                 src={image}
                                 alt={`Vehicle ${index + 1}`}
+                                width={64}
+                                height={64}
                                 className="w-16 h-16 object-cover rounded-md border"
                               />
                             ))}
@@ -584,7 +500,7 @@ export default function AdminTripsPage() {
                     <p className="text-muted-foreground mb-4">
                       Create your first trip to get started
                     </p>
-                    <Button onClick={() => setShowForm(true)} className="bg-orange-600 hover:bg-orange-700">
+                    <Button onClick={() => setShowForm(true)} className="bg-primary hover:bg-primary/90">
                       <Plus className="h-4 w-4 mr-2" />
                       Add Trip
                     </Button>
@@ -592,9 +508,7 @@ export default function AdminTripsPage() {
                 </Card>
               )}
             </div>
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
-  )
-}
+          </div>
+        </AdminLayout>
+      )
+    }

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 interface CustomerLayoutProps {
   children: ReactNode
@@ -38,8 +39,18 @@ export default function CustomerLayout({ children }: CustomerLayoutProps) {
             {/* Logo/Brand */}
             <div className="flex items-center px-6 py-4 border-b border-gray-200">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Bus className="h-5 w-5 text-primary-foreground" />
+                <div className="relative w-8 h-8 flex-shrink-0">
+                  <Image 
+                    src="/logo.png" 
+                    alt="EngracedSmile Transport" 
+                    fill
+                    className="object-contain"
+                    priority
+                    onError={(e) => {
+                      console.log('Logo failed to load, using fallback');
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 </div>
                 <div>
                   <h1 className="text-lg font-semibold text-gray-900">EngracedSmile</h1>

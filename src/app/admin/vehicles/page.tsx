@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Plus, Edit, Trash2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,6 +36,7 @@ interface Vehicle {
 
 export default function VehiclesPage() {
   const { requireAdmin } = useAuth()
+  const requireAdminRef = useRef(requireAdmin)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -53,10 +54,15 @@ export default function VehiclesPage() {
     is_active: true
   })
 
+  // Update ref when requireAdmin changes
   useEffect(() => {
-    requireAdmin()
-    fetchVehicles()
+    requireAdminRef.current = requireAdmin
   }, [requireAdmin])
+
+  useEffect(() => {
+    requireAdminRef.current()
+    fetchVehicles()
+  }, [])
 
   const fetchVehicles = async () => {
     try {
@@ -305,6 +311,50 @@ export default function VehiclesPage() {
                   />
                 </div>
 
+                {/* Vehicle Features */}
+                <div>
+                  <Label>Vehicle Features</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                    {[
+                      'Air Conditioning',
+                      'WiFi',
+                      'USB Charging',
+                      'Reclining Seats',
+                      'Reading Light',
+                      'Entertainment System',
+                      'Refreshments',
+                      'Toilet',
+                      'Luggage Storage',
+                      'Priority Boarding'
+                    ].map((feature) => (
+                      <div key={feature} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`feature-${feature}`}
+                          checked={formData.features.includes(feature)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({
+                                ...formData,
+                                features: [...formData.features, feature]
+                              })
+                            } else {
+                              setFormData({
+                                ...formData,
+                                features: formData.features.filter(f => f !== feature)
+                              })
+                            }
+                          }}
+                          className="h-4 w-4"
+                        />
+                        <Label htmlFor={`feature-${feature}`} className="text-sm">
+                          {feature}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Image Upload */}
                 <VehicleImageUpload
                   vehicleId={editingVehicle?.id || 'new'}
@@ -363,6 +413,20 @@ export default function VehiclesPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Vehicle Features */}
+                {vehicle.features.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Features:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {vehicle.features.map((feature, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {feature}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Vehicle Images */}
                 {vehicle.images.length > 0 && (

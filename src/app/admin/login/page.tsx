@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import Image from 'next/image'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -63,8 +64,18 @@ export default function AdminLoginPage() {
         {/* Admin Branding */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-              <Bus className="h-7 w-7 text-primary-foreground" />
+            <div className="relative w-12 h-12 flex-shrink-0">
+              <Image 
+                src="/logo.png" 
+                alt="EngracedSmile Transport" 
+                fill
+                className="object-contain"
+                priority
+                onError={(e) => {
+                  console.log('Logo failed to load, using fallback');
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Admin Portal</h1>

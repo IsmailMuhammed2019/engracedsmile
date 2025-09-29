@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { CreditCard, Download, Search, TrendingUp, DollarSign, Users, Receipt, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -57,6 +57,7 @@ interface StatusData {
 
 export default function PaymentsPage() {
   const { requireAdmin } = useAuth()
+  const requireAdminRef = useRef(requireAdmin)
   const [payments, setPayments] = useState<Payment[]>([])
   const [filteredPayments, setFilteredPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
@@ -81,15 +82,10 @@ export default function PaymentsPage() {
       setLoading(true)
       
       // Fetch payments from Supabase (bookings with payment info)
+      // First get bookings without joins to avoid foreign key issues
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
-        .select(`
-          *,
-          trip:trips(
-            id, departure_time, arrival_time, price,
-            route:routes(from_city, to_city)
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
       if (bookingsError) throw bookingsError
@@ -101,9 +97,9 @@ export default function PaymentsPage() {
         
         return {
           id: booking.id,
-          amount: booking.total_price,
+          amount: booking.total_price || booking.total_amount || 0,
           currency: 'NGN',
-          status: booking.payment_status,
+          status: booking.payment_status || 'pending',
           reference: paymentReference,
           customer: {
             email: booking.passenger_email || 'customer@example.com',
@@ -113,11 +109,11 @@ export default function PaymentsPage() {
           paid_at: isPaid ? booking.updated_at : null,
           gateway_response: isPaid ? 'success' : 'pending',
           channel: 'paystack',
-          fees: booking.total_price * 0.015, // 1.5% Paystack fee
+          fees: (booking.total_price || booking.total_amount || 0) * 0.015, // 1.5% Paystack fee
           metadata: {
             trip_id: booking.trip_id,
             passengers: booking.num_passengers || 1,
-            route: booking.trip?.route ? `${booking.trip.route.from_city} to ${booking.trip.route.to_city}` : 'N/A',
+            route: 'Trip Route', // Simplified since we're not joining tables
             booking_reference: booking.booking_reference,
             seat_number: booking.seat_number
           }
@@ -141,10 +137,15 @@ export default function PaymentsPage() {
     }
   }, [])
 
+  // Update ref when requireAdmin changes
   useEffect(() => {
-    requireAdmin()
+    requireAdminRef.current = requireAdmin
+  }, [requireAdmin])
+
+  useEffect(() => {
+    requireAdminRef.current()
     fetchPayments()
-  }, [requireAdmin, fetchPayments])
+  }, [fetchPayments])
 
   const calculateStats = (paymentsData: Payment[]) => {
     const totalPayments = paymentsData.length

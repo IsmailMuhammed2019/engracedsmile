@@ -378,6 +378,20 @@ export default function BookPage() {
                           )}
                         </div>
                       )}
+
+                      {/* Vehicle Features */}
+                      {trip.vehicle.features && trip.vehicle.features.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Features:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {trip.vehicle.features.map((feature, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {feature}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Driver Info */}
