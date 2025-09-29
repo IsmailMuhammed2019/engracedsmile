@@ -443,10 +443,9 @@ export default function AdminTripsPage() {
 
             <div className="space-y-4">
               {trips.map((trip) => (
-                <Card key={trip.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                <Card key={trip.id} className="h-full flex flex-col">
+                  <CardContent className="p-6 flex-1 flex flex-col">
+                    <div className="flex-1">
                         <div className="flex items-center gap-4 mb-4">
                           <div className="flex-1">
                             <h3 className="text-lg font-semibold">
@@ -501,32 +500,33 @@ export default function AdminTripsPage() {
                             ))}
                           </div>
                         )}
-                      </div>
+                    </div>
 
-                      <div className="flex gap-2 ml-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(trip)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleTripStatus(trip)}
-                        >
-                          {trip.is_active ? 'Deactivate' : 'Activate'}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(trip.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    <div className="flex gap-2 mt-auto pt-4 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(trip)}
+                      >
+                        <Edit className="h-4 w-4" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleTripStatus(trip)}
+                      >
+                        {trip.is_active ? 'Deactivate' : 'Activate'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(trip.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

@@ -312,7 +312,7 @@ export default function TripCategoriesPage() {
             const discountAmount = originalPrice - trip.price
 
             return (
-              <Card key={trip.id} className="hover:shadow-lg transition-shadow">
+              <Card key={trip.id} className="hover:shadow-lg transition-shadow h-full flex flex-col">
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <div>
@@ -336,7 +336,7 @@ export default function TripCategoriesPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 flex-1 flex flex-col">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Departure</span>
                     <span className="font-medium">
@@ -388,7 +388,7 @@ export default function TripCategoriesPage() {
                     </div>
                   )}
 
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex gap-2 mt-auto pt-4 border-t">
                     <Button
                       variant="outline"
                       size="sm"
