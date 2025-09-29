@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
@@ -47,6 +47,7 @@ export default function DriversPage() {
     image_url: ''
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const DRIVER_BUCKET = (process.env.NEXT_PUBLIC_DRIVER_IMAGES_BUCKET || 'driver-images').trim()
 
   useEffect(() => {
     requireAdmin()
@@ -88,18 +89,41 @@ export default function DriversPage() {
         const fileName = `${Date.now()}.${fileExt}`
         const filePath = `drivers/${fileName}`
 
-        const { error: uploadError } = await supabase.storage
-          .from('driver-images')
-          .upload(filePath, imageFile)
+        // Ensure authenticated for upload
+        const { data: sessionData } = await supabase.auth.getSession()
+        if (!sessionData?.session?.user) {
+          toast.error('You must be signed in to upload images')
+          return
+        }
 
-        if (uploadError) throw uploadError
+        const { error: uploadError } = await supabase.storage
+          .from(DRIVER_BUCKET)
+          .upload(filePath, imageFile, {
+            cacheControl: '3600',
+            upsert: true,
+            contentType: imageFile.type,
+          })
+
+        if (uploadError) {
+          const msg = (uploadError as unknown as { message?: string })?.message || 'Upload failed'
+          if (msg.toLowerCase().includes('bucket not found')) {
+            toast.error(`Storage bucket "${DRIVER_BUCKET}" not found`)
+          } else {
+            toast.error(msg)
+          }
+          throw uploadError
+        }
 
         const { data: { publicUrl } } = supabase.storage
-          .from('driver-images')
+          .from(DRIVER_BUCKET)
           .getPublicUrl(filePath)
 
         imageUrl = publicUrl
       }
+
+      // Attach current user id when available (helps with schemas requiring user_id)
+      const { data: userData } = await supabase.auth.getUser()
+      const userId = userData?.user?.id || null
 
       const driverData = {
         full_name: formData.full_name,
@@ -111,7 +135,8 @@ export default function DriversPage() {
         emergency_contact: formData.emergency_contact,
         emergency_phone: formData.emergency_phone,
         image_url: imageUrl,
-        is_active: true
+        is_active: true,
+        ...(userId ? { user_id: userId } : {})
       }
 
       if (editingDriver) {
@@ -120,6 +145,7 @@ export default function DriversPage() {
           .from('drivers')
           .update(driverData)
           .eq('id', editingDriver.id)
+          .select()
 
         if (error) throw error
         toast.success('Driver updated successfully.')
@@ -128,6 +154,7 @@ export default function DriversPage() {
         const { error } = await supabase
           .from('drivers')
           .insert(driverData)
+          .select()
 
         if (error) throw error
         toast.success('Driver added successfully.')
@@ -149,8 +176,9 @@ export default function DriversPage() {
       setImageFile(null)
       fetchDrivers()
     } catch (error) {
-      console.error('Error saving driver:', error)
-      toast.error('Failed to save driver.')
+      const message = error instanceof Error ? error.message : JSON.stringify(error || {})
+      console.error('Error saving driver:', message)
+      toast.error(message || 'Failed to save driver.')
     }
   }
 
@@ -235,10 +263,12 @@ export default function DriversPage() {
           </div>
           
           <Dialog open={showForm} onOpenChange={setShowForm}>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
+          <DialogTrigger asChild>
+            <Button className="cursor-pointer" onClick={() => {
                 setEditingDriver(null)
-                setFormData({ license_number: '', phone_number: '' })
+                setFormData({
+                  full_name: '', age: '', phone_number: '', license_number: '', license_expiry: '', address: '', emergency_contact: '', emergency_phone: '', image_url: ''
+                })
               }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Driver
@@ -249,6 +279,9 @@ export default function DriversPage() {
                 <DialogTitle>
                   {editingDriver ? 'Edit Driver' : 'Add New Driver'}
                 </DialogTitle>
+              <DialogDescription>
+                {editingDriver ? 'Update driver details and photo' : 'Enter driver details and optional photo'}
+              </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -376,10 +409,10 @@ export default function DriversPage() {
                 </div>
 
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                  <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="cursor-pointer">
                     Cancel
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" className="cursor-pointer">
                     {editingDriver ? 'Update Driver' : 'Add Driver'}
                   </Button>
                 </DialogFooter>
@@ -485,7 +518,7 @@ export default function DriversPage() {
               {searchTerm ? 'No drivers match your search criteria.' : 'Get started by adding your first driver.'}
             </p>
             {!searchTerm && (
-              <Button onClick={() => setShowForm(true)}>
+              <Button onClick={() => setShowForm(true)} className="cursor-pointer">
                 <Plus className="h-4 w-4 mr-2" />
                 Add First Driver
               </Button>

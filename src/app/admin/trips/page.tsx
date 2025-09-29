@@ -28,6 +28,7 @@ interface Route {
   to_city: string
   distance_km: number
   duration_hours: number
+  base_price?: number
 }
 
 interface Vehicle {
@@ -161,13 +162,50 @@ export default function AdminTripsPage() {
     e.preventDefault()
     
     try {
+      // Validate required selections
+      if (!formData.route_id || !formData.vehicle_id || !formData.driver_id || !formData.departure_time) {
+        toast.error('Please select route, vehicle, driver and departure time')
+        return
+      }
+
+      const selectedRoute = routes.find(r => r.id === formData.route_id)
+      const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id)
+
+      // Compute arrival_time using route duration
+      const departureLocal = new Date(formData.departure_time)
+      const durationMinutes = Math.round((selectedRoute?.duration_hours || 0) * 60)
+      const arrivalDate = new Date(departureLocal.getTime() + durationMinutes * 60 * 1000)
+      const arrival_time = arrivalDate.toISOString()
+
+      // Price: use entered price or fallback to route base_price
+      const enteredPrice = parseFloat(formData.price)
+      const price = Number.isFinite(enteredPrice) && enteredPrice > 0
+        ? enteredPrice
+        : (selectedRoute?.base_price || 0)
+
+      // Available seats: use entered or vehicle capacity
+      const enteredSeats = parseInt(formData.available_seats)
+      const available_seats = Number.isFinite(enteredSeats) && enteredSeats > 0
+        ? enteredSeats
+        : (selectedVehicle?.capacity || 0)
+      
+      if (!Number.isFinite(price) || price <= 0) {
+        toast.error('Please enter a valid price or set route base price')
+        return
+      }
+      if (!Number.isFinite(available_seats) || available_seats <= 0) {
+        toast.error('Please enter available seats or ensure vehicle capacity is set')
+        return
+      }
+
       const tripData = {
         route_id: formData.route_id,
         vehicle_id: formData.vehicle_id,
         driver_id: formData.driver_id,
-        departure_time: formData.departure_time,
-        price: parseFloat(formData.price),
-        available_seats: parseInt(formData.available_seats),
+        departure_time: new Date(formData.departure_time).toISOString(),
+        arrival_time,
+        price,
+        available_seats,
         is_active: true
       }
 
@@ -176,6 +214,7 @@ export default function AdminTripsPage() {
           .from('trips')
           .update(tripData)
           .eq('id', editingTrip.id)
+          .select()
 
         if (error) throw error
         toast.success('Trip updated successfully')
@@ -183,6 +222,7 @@ export default function AdminTripsPage() {
         const { error } = await supabase
           .from('trips')
           .insert(tripData)
+          .select()
 
         if (error) throw error
         toast.success('Trip created successfully')

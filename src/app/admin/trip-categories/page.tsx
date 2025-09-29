@@ -49,6 +49,28 @@ interface Trip {
   }
 }
 
+interface RouteOption {
+  id: string
+  from_city: string
+  to_city: string
+  duration_hours?: number
+  base_price?: number
+}
+
+interface VehicleOption {
+  id: string
+  make: string
+  model: string
+  vehicle_type: string
+  capacity?: number
+}
+
+interface DriverOption {
+  id: string
+  license_number: string
+  phone_number: string
+}
+
 const TRIP_CATEGORIES = [
   { value: 'regular', label: 'Regular', color: 'bg-gray-100 text-gray-800' },
   { value: 'premium', label: 'Premium', color: 'bg-blue-100 text-blue-800' },
@@ -69,6 +91,9 @@ export default function TripCategoriesPage() {
   const [formLoading, setFormLoading] = useState(false)
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterPromo, setFilterPromo] = useState<string>('all')
+  const [routes, setRoutes] = useState<RouteOption[]>([])
+  const [vehicles, setVehicles] = useState<VehicleOption[]>([])
+  const [drivers, setDrivers] = useState<DriverOption[]>([])
 
   const fetchTrips = useCallback(async () => {
     setLoading(true)
@@ -85,6 +110,19 @@ export default function TripCategoriesPage() {
 
       if (error) throw error
       setTrips(data || [])
+
+      // Fetch supporting data for creating trips
+      const [routesRes, vehiclesRes, driversRes] = await Promise.all([
+        supabase.from('routes').select('id, from_city, to_city, duration_hours, base_price').order('from_city'),
+        supabase.from('vehicles').select('id, make, model, vehicle_type, capacity').eq('is_active', true).order('plate_number'),
+        supabase.from('drivers').select('id, license_number, phone_number').eq('is_active', true).order('license_number'),
+      ])
+      if (routesRes.error) throw routesRes.error
+      if (vehiclesRes.error) throw vehiclesRes.error
+      if (driversRes.error) throw driversRes.error
+      setRoutes(routesRes.data || [])
+      setVehicles(vehiclesRes.data || [])
+      setDrivers(driversRes.data || [])
     } catch (error) {
       console.error('Error fetching trips:', error)
       toast.error('Failed to load trips.')
@@ -100,6 +138,9 @@ export default function TripCategoriesPage() {
 
   const handleCreateNew = () => {
     setCurrentTrip({
+      route_id: '',
+      vehicle_id: '',
+      driver_id: '',
       departure_time: new Date().toISOString().slice(0, 16),
       arrival_time: new Date(Date.now() + 3 * 3600 * 1000).toISOString().slice(0, 16),
       price: 0,
@@ -150,8 +191,8 @@ export default function TripCategoriesPage() {
         route_id: currentTrip.route_id,
         vehicle_id: currentTrip.vehicle_id,
         driver_id: currentTrip.driver_id,
-        departure_time: currentTrip.departure_time,
-        arrival_time: currentTrip.arrival_time,
+        departure_time: new Date(currentTrip.departure_time as string).toISOString(),
+        arrival_time: new Date(currentTrip.arrival_time as string).toISOString(),
         price: currentTrip.price,
         total_seats: currentTrip.total_seats,
         available_seats: currentTrip.available_seats !== undefined ? currentTrip.available_seats : currentTrip.total_seats,
@@ -169,19 +210,23 @@ export default function TripCategoriesPage() {
           .from('trips')
           .update(payload)
           .eq('id', currentTrip.id)
+          .select()
         if (error) throw error
         toast.success('Trip updated successfully!')
       } else {
         // Create new trip
-        const { error } = await supabase.from('trips').insert(payload)
+        const { error } = await supabase.from('trips').insert(payload).select()
         if (error) throw error
         toast.success('Trip created successfully!')
       }
       setIsModalOpen(false)
       fetchTrips()
     } catch (error) {
-      console.error('Error saving trip:', error)
-      toast.error('Failed to save trip.')
+      const message = (error && typeof error === 'object' && 'message' in (error as any))
+        ? String((error as any).message)
+        : JSON.stringify(error || {})
+      console.error('Error saving trip:', message)
+      toast.error(message || 'Failed to save trip.')
     } finally {
       setFormLoading(false)
     }
@@ -395,8 +440,70 @@ export default function TripCategoriesPage() {
               <DialogTitle>
                 {currentTrip?.id ? 'Edit Trip' : 'Create New Trip'}
               </DialogTitle>
+              <p className="text-sm text-gray-500">Set route, vehicle, driver, time, seats, and optional promo.</p>
             </DialogHeader>
             <form onSubmit={handleFormSubmit} className="space-y-6">
+              {/* Core selections */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="route">Route</Label>
+                  <Select
+                    value={currentTrip?.route_id || ''}
+                    onValueChange={(value) => setCurrentTrip({ ...currentTrip, route_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select route" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {routes.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.from_city} → {r.to_city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="vehicle">Vehicle</Label>
+                  <Select
+                    value={currentTrip?.vehicle_id || ''}
+                    onValueChange={(value) => setCurrentTrip({ ...currentTrip, vehicle_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select vehicle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicles.map((v) => (
+                        <SelectItem key={v.id} value={v.id}>
+                          {v.make} {v.model} ({v.vehicle_type})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="driver">Driver</Label>
+                  <Select
+                    value={currentTrip?.driver_id || ''}
+                    onValueChange={(value) => setCurrentTrip({ ...currentTrip, driver_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select driver" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {drivers.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          Driver {d.license_number}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="category">Trip Category</Label>
