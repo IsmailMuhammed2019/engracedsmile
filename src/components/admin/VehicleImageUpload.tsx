@@ -20,15 +20,24 @@ export default function VehicleImageUpload({
 }: VehicleImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [previewImages, setPreviewImages] = useState<string[]>([])
+  const BUCKET = (process.env.NEXT_PUBLIC_VEHICLE_IMAGES_BUCKET || 'vehicle-images').trim()
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
+    const inputEl = event.target
+    const files = inputEl.files
     if (!files || files.length === 0) return
 
     setUploading(true)
     const uploadedUrls: string[] = []
 
     try {
+      // Ensure user is authenticated; Storage insert needs auth unless you made it public-write
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (!sessionData?.session?.user) {
+        toast.error('You must be signed in to upload images')
+        return
+      }
+
       for (const file of Array.from(files)) {
         // Validate file type
         if (!file.type.startsWith('image/')) {
@@ -47,20 +56,42 @@ export default function VehicleImageUpload({
         const fileName = `${vehicleId}-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
         const filePath = `vehicles/${fileName}`
 
-        // Upload to Supabase Storage
-        const { error: uploadError } = await supabase.storage
-          .from('vehicle-images')
-          .upload(filePath, file)
+        // Upload to Supabase Storage with sensible defaults and timeout
+        const uploadPromise = supabase.storage
+          .from(BUCKET)
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true,
+            contentType: file.type,
+          })
+
+        const { error: uploadError } = await Promise.race([
+          uploadPromise,
+          new Promise<{ error: unknown }>((resolve) =>
+            setTimeout(() => resolve({ error: { message: 'Upload timed out' } }), 45000)
+          ),
+        ]) as { error: unknown }
 
         if (uploadError) {
           console.error('Upload error:', uploadError)
-          toast.error('Failed to upload image')
+          const message = (typeof uploadError === 'object' && uploadError && 'message' in uploadError)
+            ? String((uploadError as { message?: unknown }).message)
+            : 'Failed to upload image'
+          const lower = message.toLowerCase()
+          if (lower.includes('bucket not found')) {
+            toast.error(`Storage bucket "${BUCKET}" not found. Create it in Supabase → Storage and make it public.`)
+            console.error('Bucket not found diagnostic:', { bucket: BUCKET, filePath })
+          } else if (lower.includes('row-level') || lower.includes('rls') || lower.includes('not allowed') || lower.includes('unauthorized') || lower.includes('forbidden')) {
+            toast.error('Upload blocked by Storage policies. Allow INSERT for authenticated on this bucket.')
+          } else {
+            toast.error(message || 'Failed to upload image')
+          }
           continue
         }
 
         // Get public URL
         const { data } = supabase.storage
-          .from('vehicle-images')
+          .from(BUCKET)
           .getPublicUrl(filePath)
 
         uploadedUrls.push(data.publicUrl)
@@ -77,6 +108,8 @@ export default function VehicleImageUpload({
       toast.error('Failed to upload images')
     } finally {
       setUploading(false)
+      // Allow selecting the same files again after completion
+      try { inputEl.value = '' } catch {}
     }
   }
 

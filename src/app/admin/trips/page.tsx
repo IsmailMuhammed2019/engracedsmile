@@ -68,7 +68,7 @@ interface Trip {
 }
 
 export default function AdminTripsPage() {
-  const { user, profile, requireAdmin } = useAuth()
+  const { user, profile, isLoading, requireAdmin } = useAuth()
   const [trips, setTrips] = useState<Trip[]>([])
   const [routes, setRoutes] = useState<Route[]>([])
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
@@ -94,13 +94,13 @@ export default function AdminTripsPage() {
 
   // Check authentication and fetch data
   useEffect(() => {
+    if (isLoading) return
     if (!user || !profile?.is_admin) {
       requireAdminRef.current()
       return
     }
-    
     fetchData()
-  }, [user, profile])
+  }, [isLoading, user, profile])
 
   const fetchData = async () => {
     try {
@@ -255,8 +255,8 @@ export default function AdminTripsPage() {
     }
   }
 
-  // Show loading if still checking auth or fetching data
-  if (loading || !user || !profile?.is_admin) {
+  // Show loading while auth resolving or fetching
+  if (isLoading || loading || !user || !profile?.is_admin) {
     return (
       <AdminLayout>
         <div className="max-w-7xl mx-auto px-4 py-8">

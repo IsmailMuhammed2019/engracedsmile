@@ -56,7 +56,7 @@ interface StatusData {
 }
 
 export default function PaymentsPage() {
-  const { requireAdmin } = useAuth()
+  const { isLoading, requireAdmin } = useAuth()
   const requireAdminRef = useRef(requireAdmin)
   const [payments, setPayments] = useState<Payment[]>([])
   const [filteredPayments, setFilteredPayments] = useState<Payment[]>([])
@@ -143,9 +143,10 @@ export default function PaymentsPage() {
   }, [requireAdmin])
 
   useEffect(() => {
-    requireAdminRef.current()
+    if (isLoading) return
+    if (!requireAdminRef.current()) return
     fetchPayments()
-  }, [fetchPayments])
+  }, [isLoading, fetchPayments])
 
   const calculateStats = (paymentsData: Payment[]) => {
     const totalPayments = paymentsData.length
@@ -296,7 +297,7 @@ export default function PaymentsPage() {
     window.URL.revokeObjectURL(url)
   }
 
-  if (loading) {
+  if (isLoading || loading) {
     return (
       <AdminLayout>
         <div className="max-w-7xl mx-auto px-4 py-8">

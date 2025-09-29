@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Plus, MapPin, Edit, Trash2, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,13 +16,15 @@ interface Route {
   from_city: string
   to_city: string
   distance_km: number
-  estimated_duration_hours: number
+  duration_hours: number
+  base_price: number
   is_active: boolean
   created_at: string
 }
 
 export default function RoutesPage() {
-  const { requireAdmin } = useAuth()
+  const { isLoading, requireAdmin } = useAuth()
+  const requireAdminRef = useRef(requireAdmin)
   const [routes, setRoutes] = useState<Route[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -32,13 +34,20 @@ export default function RoutesPage() {
     from_city: '',
     to_city: '',
     distance_km: '',
-    estimated_duration_hours: ''
+    duration_hours: '',
+    base_price: ''
   })
 
+  // Keep requireAdmin stable across renders
   useEffect(() => {
-    requireAdmin()
+    requireAdminRef.current = requireAdmin
+  }, [requireAdmin])
+
+  useEffect(() => {
+    if (isLoading) return
+    if (!requireAdminRef.current()) return
     fetchRoutes()
-  }, [])
+  }, [isLoading])
 
   const fetchRoutes = async () => {
     try {
@@ -65,7 +74,8 @@ export default function RoutesPage() {
         from_city: formData.from_city,
         to_city: formData.to_city,
         distance_km: parseFloat(formData.distance_km),
-        estimated_duration_hours: parseFloat(formData.estimated_duration_hours)
+        duration_hours: parseFloat(formData.duration_hours),
+        base_price: parseFloat(formData.base_price)
       }
 
       if (editingRoute) {
@@ -87,7 +97,7 @@ export default function RoutesPage() {
 
       setShowForm(false)
       setEditingRoute(null)
-      setFormData({ from_city: '', to_city: '', distance_km: '', estimated_duration_hours: '' })
+      setFormData({ from_city: '', to_city: '', distance_km: '', duration_hours: '', base_price: '' })
       fetchRoutes()
     } catch (error) {
       console.error('Error saving route:', error)
@@ -101,7 +111,8 @@ export default function RoutesPage() {
       from_city: route.from_city,
       to_city: route.to_city,
       distance_km: route.distance_km.toString(),
-      estimated_duration_hours: route.estimated_duration_hours.toString()
+      duration_hours: (route.duration_hours ?? 0).toString(),
+      base_price: (route.base_price ?? 0).toString()
     })
     setShowForm(true)
   }
@@ -145,7 +156,7 @@ export default function RoutesPage() {
     route.to_city.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  if (loading) {
+  if (isLoading || loading) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
@@ -203,7 +214,7 @@ export default function RoutesPage() {
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <span>{route.distance_km} km</span>
                         <span>•</span>
-                        <span>{route.estimated_duration_hours} hours</span>
+                        <span>{route.duration_hours} hours</span>
                       </div>
                     </div>
                   </div>
@@ -306,12 +317,22 @@ export default function RoutesPage() {
                     <Input
                       type="number"
                       step="0.5"
-                      value={formData.estimated_duration_hours}
-                      onChange={(e) => setFormData(prev => ({ ...prev, estimated_duration_hours: e.target.value }))}
+                      value={formData.duration_hours}
+                      onChange={(e) => setFormData(prev => ({ ...prev, duration_hours: e.target.value }))}
                       placeholder="6"
                       required
                     />
                   </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Base Price (₦)</label>
+                  <Input
+                    type="number"
+                    value={formData.base_price}
+                    onChange={(e) => setFormData(prev => ({ ...prev, base_price: e.target.value }))}
+                    placeholder="15000"
+                    required
+                  />
                 </div>
                 <div className="flex space-x-2 pt-4">
                   <Button type="submit" className="flex-1">
@@ -323,7 +344,7 @@ export default function RoutesPage() {
                     onClick={() => {
                       setShowForm(false)
                       setEditingRoute(null)
-                      setFormData({ from_city: '', to_city: '', distance_km: '', estimated_duration_hours: '' })
+                      setFormData({ from_city: '', to_city: '', distance_km: '', duration_hours: '', base_price: '' })
                     }}
                   >
                     Cancel

@@ -46,7 +46,7 @@ interface DashboardStats {
 
 export default function AdminDashboard() {
   const router = useRouter()
-  const { user, profile, requireAdmin } = useAuth()
+  const { user, profile, isLoading, requireAdmin } = useAuth()
   const requireAdminRef = useRef(requireAdmin)
   const [stats, setStats] = useState<DashboardStats>({
     totalBookings: 0,
@@ -70,25 +70,17 @@ export default function AdminDashboard() {
   }, [requireAdmin])
 
   useEffect(() => {
-    console.log('Auth state:', { user: !!user, profile: !!profile, isAdmin: profile?.is_admin })
-    
-    // Set auth checked after a short delay to prevent infinite loading
-    const timer = setTimeout(() => {
-      setAuthChecked(true)
-    }, 1000)
-    
-    // Redirect if not admin
+    // Wait until auth completes before deciding
+    if (isLoading) return
+    setAuthChecked(true)
+
     if (!user || !profile?.is_admin) {
-      console.log('User not authenticated or not admin:', { user: !!user, isAdmin: profile?.is_admin })
       requireAdminRef.current()
       return
     }
-    
-    console.log('User authenticated and is admin, fetching data...')
+
     fetchDashboardData()
-    
-    return () => clearTimeout(timer)
-  }, [user, profile])
+  }, [isLoading, user, profile])
 
   const fetchDashboardData = async () => {
     try {
@@ -236,7 +228,7 @@ export default function AdminDashboard() {
   }
 
   // Show loading if still fetching data
-  if (loading) {
+  if (loading || !authChecked) {
     return (
       <AdminLayout>
         <div className="max-w-7xl mx-auto px-4 py-8">

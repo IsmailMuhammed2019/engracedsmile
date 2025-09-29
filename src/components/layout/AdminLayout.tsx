@@ -49,6 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     src="/logo.png" 
                     alt="EngracedSmile Transport" 
                     fill
+                    sizes="32px"
                     className="object-contain"
                     priority
                     onError={(e) => {

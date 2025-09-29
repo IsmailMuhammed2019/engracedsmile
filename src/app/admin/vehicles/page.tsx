@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import AdminLayout from '@/components/layout/AdminLayout'
@@ -35,7 +35,7 @@ interface Vehicle {
 }
 
 export default function VehiclesPage() {
-  const { requireAdmin } = useAuth()
+  const { isLoading, requireAdmin } = useAuth()
   const requireAdminRef = useRef(requireAdmin)
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,9 +60,10 @@ export default function VehiclesPage() {
   }, [requireAdmin])
 
   useEffect(() => {
-    requireAdminRef.current()
+    if (isLoading) return
+    if (!requireAdminRef.current()) return
     fetchVehicles()
-  }, [])
+  }, [isLoading])
 
   const fetchVehicles = async () => {
     try {
@@ -182,7 +183,7 @@ export default function VehiclesPage() {
     }
   }
 
-  if (loading) {
+  if (isLoading || loading) {
     return (
       <AdminLayout>
         <div className="text-center py-12">
@@ -210,6 +211,9 @@ export default function VehiclesPage() {
                 <DialogTitle>
                   {editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}
                 </DialogTitle>
+                <DialogDescription>
+                  {editingVehicle ? 'Update vehicle details and images' : 'Enter vehicle details and upload images'}
+                </DialogDescription>
               </DialogHeader>
               
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -270,8 +274,14 @@ export default function VehiclesPage() {
                     <Input
                       id="year"
                       type="number"
-                      value={formData.year}
-                      onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                      value={Number.isNaN(formData.year) ? 0 : formData.year}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setFormData({ 
+                          ...formData, 
+                          year: value === '' ? 0 : parseInt(value, 10) 
+                        })
+                      }}
                       required
                     />
                   </div>
@@ -283,8 +293,14 @@ export default function VehiclesPage() {
                     <Input
                       id="capacity"
                       type="number"
-                      value={formData.capacity}
-                      onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) })}
+                      value={Number.isNaN(formData.capacity) ? 0 : formData.capacity}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setFormData({ 
+                          ...formData, 
+                          capacity: value === '' ? 0 : parseInt(value, 10) 
+                        })
+                      }}
                       required
                     />
                   </div>

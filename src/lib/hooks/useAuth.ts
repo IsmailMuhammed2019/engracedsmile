@@ -5,7 +5,8 @@ import { useAuthStore } from '@/lib/stores/auth'
 
 export const useAuth = () => {
   const router = useRouter()
-  const { user, profile, setUser, setProfile, setLoading, logout } = useAuthStore()
+  // Select reactive pieces from the store so components re-render on changes
+  const { user, profile, isLoading, setUser, setProfile, setLoading, logout } = useAuthStore()
 
   const fetchUserProfile = useCallback(async (userId: string) => {
     try {
@@ -134,7 +135,9 @@ export const useAuth = () => {
   }
 
   const requireAuth = () => {
-    if (!user) {
+    // Avoid premature redirects while auth is still resolving
+    if (useAuthStore.getState().isLoading) return false
+    if (!useAuthStore.getState().user) {
       router.push('/auth/login')
       return false
     }
@@ -142,11 +145,15 @@ export const useAuth = () => {
   }
 
   const requireAdmin = () => {
-    if (!user) {
+    // Avoid premature redirects while auth is still resolving
+    if (useAuthStore.getState().isLoading) return false
+    const currentUser = useAuthStore.getState().user
+    const currentProfile = useAuthStore.getState().profile
+    if (!currentUser) {
       router.push('/auth/login')
       return false
     }
-    if (!profile?.is_admin) {
+    if (!currentProfile?.is_admin) {
       router.push('/')
       return false
     }
@@ -161,6 +168,6 @@ export const useAuth = () => {
     signOut,
     requireAuth,
     requireAdmin,
-    isLoading: useAuthStore.getState().isLoading,
+    isLoading,
   }
 }
