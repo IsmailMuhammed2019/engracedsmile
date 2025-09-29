@@ -43,8 +43,8 @@ export default function LoginPage() {
           {/* Customer Login */}
           <Card className="hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
             <CardHeader className="text-center pb-4">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-orange-600" />
+              <div className="w-16 h-16 bg-[#6b5618]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-[#6b5618]" />
               </div>
               <CardTitle className="text-2xl font-bold text-gray-900">Customer Portal</CardTitle>
               <p className="text-gray-600">Access your bookings and manage your travel</p>
@@ -52,26 +52,26 @@ export default function LoginPage() {
             <CardContent className="space-y-6">
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 text-sm text-gray-600">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-[#6b5618] rounded-full"></div>
                   <span>Search and book trips</span>
                 </div>
                 <div className="flex items-center space-x-3 text-sm text-gray-600">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-[#6b5618] rounded-full"></div>
                   <span>Manage your bookings</span>
                 </div>
                 <div className="flex items-center space-x-3 text-sm text-gray-600">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-[#6b5618] rounded-full"></div>
                   <span>Update your profile</span>
                 </div>
                 <div className="flex items-center space-x-3 text-sm text-gray-600">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-[#6b5618] rounded-full"></div>
                   <span>Track your trips</span>
                 </div>
               </div>
               
               <Button 
                 onClick={handleCustomerLogin}
-                className="w-full h-12 bg-orange-600 hover:bg-orange-700 text-white font-medium"
+                className="w-full h-12 bg-[#6b5618] hover:bg-[#5d4a15] text-white font-medium"
               >
                 <span>Customer Login</span>
                 <ArrowRight className="ml-2 h-4 w-4" />

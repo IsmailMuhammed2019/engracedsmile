@@ -66,12 +66,12 @@ export default function RegisterPage() {
     <PWALayout>
       <div className="min-h-screen flex">
         {/* Left side - Image */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-orange-500 to-orange-600 relative">
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#6b5618] to-[#5d4a15] relative">
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
             <div className="text-center">
               <h1 className="text-4xl font-bold mb-6">Join Us Today!</h1>
-              <p className="text-xl text-orange-100 mb-8">
+              <p className="text-xl text-white/90 mb-8">
                 Create your account and start your journey with EngracedSmile Transport
               </p>
               <div className="space-y-4">
@@ -228,15 +228,15 @@ export default function RegisterPage() {
                       name="terms"
                       type="checkbox"
                       required
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-[#6b5618] focus:ring-[#6b5618] border-gray-300 rounded"
                     />
                     <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
                       I agree to the{' '}
-                      <button type="button" className="text-orange-600 hover:text-orange-500">
+                      <button type="button" className="text-[#6b5618] hover:text-[#5d4a15]">
                         Terms of Service
                       </button>{' '}
                       and{' '}
-                      <button type="button" className="text-orange-600 hover:text-orange-500">
+                      <button type="button" className="text-[#6b5618] hover:text-[#5d4a15]">
                         Privacy Policy
                       </button>
                     </label>
@@ -244,7 +244,7 @@ export default function RegisterPage() {
 
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-orange-600 hover:bg-orange-700 text-white font-medium"
+                    className="w-full h-12 bg-[#6b5618] hover:bg-[#5d4a15] text-white font-medium"
                     disabled={loading}
                   >
                     {loading ? (
@@ -266,7 +266,7 @@ export default function RegisterPage() {
                     Already have an account?{' '}
                     <button
                       onClick={() => router.push('/auth/login')}
-                      className="font-medium text-orange-600 hover:text-orange-500"
+                      className="font-medium text-[#6b5618] hover:text-[#5d4a15]"
                     >
                       Sign in here
                     </button>
