@@ -86,15 +86,44 @@ export default function VehiclesPage() {
     e.preventDefault()
     
     try {
+      // Build payload explicitly to avoid sending columns that may not exist in DB
+      const basePayload: {
+        plate_number: string
+        make: string
+        model: string
+        year: number
+        capacity: number
+        vehicle_type: 'bus' | 'minibus' | 'car'
+        is_active: boolean
+        features: string[]
+        images: string[]
+        description?: string
+      } = {
+        plate_number: formData.plate_number,
+        make: formData.make,
+        model: formData.model,
+        year: formData.year,
+        capacity: formData.capacity,
+        vehicle_type: formData.vehicle_type,
+        is_active: formData.is_active,
+        features: formData.features || [],
+        images: formData.images || [],
+      }
+
+      if (formData.description && formData.description.trim().length > 0) {
+        basePayload.description = formData.description.trim()
+      }
+
       if (editingVehicle) {
         // Update existing vehicle
         const { error } = await supabase
           .from('vehicles')
           .update({
-            ...formData,
-            updated_at: new Date().toISOString()
+            ...basePayload,
+            updated_at: new Date().toISOString(),
           })
           .eq('id', editingVehicle.id)
+          .select()
 
         if (error) throw error
         toast.success('Vehicle updated successfully')
@@ -102,7 +131,8 @@ export default function VehiclesPage() {
         // Create new vehicle
         const { error } = await supabase
           .from('vehicles')
-          .insert([formData])
+          .insert([basePayload])
+          .select()
 
         if (error) throw error
         toast.success('Vehicle created successfully')
@@ -113,8 +143,9 @@ export default function VehiclesPage() {
       resetForm()
       fetchVehicles()
     } catch (error) {
-      console.error('Error saving vehicle:', error)
-      toast.error('Failed to save vehicle')
+      const message = error instanceof Error ? error.message : JSON.stringify(error || {})
+      console.error('Error saving vehicle:', message)
+      toast.error(message || 'Failed to save vehicle')
     }
   }
 
