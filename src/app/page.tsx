@@ -1,103 +1,221 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Calendar, MapPin, Users, Search } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent } from '@/components/ui/card'
+import { useBookingStore } from '@/lib/stores/booking'
+import CustomerLayout from '@/components/layout/CustomerLayout'
+
+const nigerianCities = [
+  'Lagos', 'Abuja', 'Kano', 'Port Harcourt', 'Ibadan', 'Kaduna', 
+  'Enugu', 'Benin City', 'Jos', 'Ilorin', 'Abeokuta', 'Owerri'
+]
+
+export default function HomePage() {
+  const router = useRouter()
+  const { searchParams, setSearchParams } = useBookingStore()
+  const [fromCity, setFromCity] = useState(searchParams.from)
+  const [toCity, setToCity] = useState(searchParams.to)
+  const [date, setDate] = useState(searchParams.date)
+  const [passengers, setPassengers] = useState(searchParams.passengers)
+
+  const handleSearch = () => {
+    setSearchParams({
+      from: fromCity,
+      to: toCity,
+      date,
+      passengers
+    })
+    router.push('/book')
+  }
+
+  const popularRoutes = [
+    { from: 'Lagos', to: 'Abuja', price: '₦15,000' },
+    { from: 'Lagos', to: 'Kano', price: '₦25,000' },
+    { from: 'Abuja', to: 'Kano', price: '₦12,000' },
+    { from: 'Lagos', to: 'Port Harcourt', price: '₦18,000' },
+  ]
+
+  const features = [
+    {
+      icon: '🚌',
+      title: 'Comfortable Buses',
+      description: 'Modern, air-conditioned buses with comfortable seating'
+    },
+    {
+      icon: '🛡️',
+      title: 'Safe Travel',
+      description: 'Experienced drivers and well-maintained vehicles'
+    },
+    {
+      icon: '📱',
+      title: 'Easy Booking',
+      description: 'Book your trip in minutes with our user-friendly platform'
+    },
+    {
+      icon: '💰',
+      title: 'Affordable Prices',
+      description: 'Competitive rates for all routes across Nigeria'
+    }
+  ]
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <CustomerLayout>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Travel Across Nigeria
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 text-blue-100">
+              Safe, comfortable, and reliable interstate transportation
+            </p>
+          </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          {/* Search Form */}
+          <Card className="max-w-4xl mx-auto">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <select
+                    value={fromCity}
+                    onChange={(e) => setFromCity(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">From</option>
+                    {nigerianCities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <select
+                    value={toCity}
+                    onChange={(e) => setToCity(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">To</option>
+                    {nigerianCities.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="pl-10"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+
+                <div className="relative">
+                  <Users className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <select
+                    value={passengers}
+                    onChange={(e) => setPassengers(Number(e.target.value))}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                      <option key={num} value={num}>{num} Passenger{num > 1 ? 's' : ''}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <Button 
+                  onClick={handleSearch}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700"
+                  disabled={!fromCity || !toCity}
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Search
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* Popular Routes */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">Popular Routes</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {popularRoutes.map((route, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold mb-2">
+                      {route.from} → {route.to}
+                    </h3>
+                    <p className="text-2xl font-bold text-blue-600 mb-2">
+                      {route.price}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        setSearchParams({
+                          from: route.from,
+                          to: route.to,
+                          date: new Date().toISOString().split('T')[0],
+                          passengers: 1
+                        })
+                        router.push('/book')
+                      }}
+                    >
+                      Book Now
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center">
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-blue-600 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Travel?</h2>
+          <p className="text-xl mb-8 text-blue-100">
+            Book your next trip with us and experience comfortable travel across Nigeria
+          </p>
+          <Button 
+            size="lg" 
+            className="bg-white text-blue-600 hover:bg-gray-100"
+            onClick={() => router.push('/book')}
+          >
+            Start Booking
+          </Button>
     </div>
-  );
+      </section>
+    </CustomerLayout>
+  )
 }

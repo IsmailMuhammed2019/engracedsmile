@@ -1,36 +1,251 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EngracedSmile Transport - PWA Booking System
 
-## Getting Started
+A comprehensive Progressive Web App (PWA) for interstate transportation booking across Nigeria, built with Next.js, Supabase, and modern web technologies.
 
-First, run the development server:
+## 🚀 Features
 
+### User Features
+- **Trip Search & Booking**: Search for trips by route, date, and passengers
+- **Real-time Availability**: View available seats and trip details
+- **User Dashboard**: Track bookings, view trip history, and manage profile
+- **Mobile-First Design**: Optimized for mobile devices with PWA capabilities
+- **Offline Support**: Works offline with service worker caching
+
+### Admin Features
+- **Route Management**: Add, edit, and manage transportation routes
+- **Vehicle Management**: Manage fleet of buses and vehicles
+- **Booking Management**: View and manage all bookings
+- **Driver Management**: Manage driver profiles and assignments
+- **Analytics Dashboard**: View booking statistics and revenue
+
+### Technical Features
+- **PWA Support**: Installable app with offline capabilities
+- **Real-time Updates**: Live booking status and trip updates
+- **Responsive Design**: Works on all device sizes
+- **Secure Authentication**: Supabase Auth with role-based access
+- **Modern UI**: Built with shadcn/ui and Tailwind CSS
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 15, React 18, TypeScript
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Backend**: Supabase (PostgreSQL, Auth, Real-time)
+- **State Management**: Zustand
+- **HTTP Client**: Axios
+- **Icons**: Lucide React
+- **Forms**: React Hook Form + Zod validation
+- **PWA**: Service Worker, Web App Manifest
+
+## 📋 Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- Git
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd engracedsmile
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Environment Setup
+Create a `.env.local` file in the root directory:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 
-## Learn More
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME=EngracedSmile Transport
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Database Setup
+1. Go to your Supabase dashboard
+2. Navigate to the SQL Editor
+3. Copy and paste the contents of `supabase-schema.sql`
+4. Run the SQL script to create all tables, indexes, and policies
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 5. Run the Development Server
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Deploy on Vercel
+## 📱 PWA Installation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Desktop
+1. Open the app in Chrome/Edge
+2. Click the install button in the address bar
+3. Follow the installation prompts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Mobile
+1. Open the app in Safari (iOS) or Chrome (Android)
+2. Tap "Add to Home Screen"
+3. The app will be installed as a native-like app
+
+## 🗄️ Database Schema
+
+### Core Tables
+- **user_profiles**: User account information
+- **drivers**: Driver profiles and credentials
+- **routes**: Transportation routes between cities
+- **vehicles**: Fleet of buses and vehicles
+- **trips**: Scheduled trips with vehicles and drivers
+- **bookings**: User bookings and reservations
+
+### Key Features
+- Row Level Security (RLS) for data protection
+- Automatic timestamp updates
+- Foreign key relationships
+- Optimized indexes for performance
+
+## 🔐 Authentication
+
+The app uses Supabase Auth with the following features:
+- Email/password authentication
+- User profile management
+- Role-based access (Admin, Driver, User)
+- Secure session management
+
+### User Roles
+- **Admin**: Full access to all features
+- **Driver**: Access to assigned trips and vehicle info
+- **User**: Standard booking and profile access
+
+## 🎨 UI Components
+
+Built with shadcn/ui components:
+- Responsive design system
+- Dark/light mode support
+- Accessible components
+- Customizable themes
+
+## 📊 Admin Dashboard
+
+### Features
+- Real-time booking statistics
+- Revenue tracking
+- Route and vehicle management
+- Driver assignment
+- Booking management
+
+### Access
+- Navigate to `/admin` (requires admin role)
+- Manage routes, vehicles, and bookings
+- View analytics and reports
+
+## 🔧 API Integration
+
+### Supabase Integration
+- Real-time subscriptions
+- Row Level Security
+- Automatic API generation
+- File storage for images
+
+### Key Functions
+- Trip search and filtering
+- Booking creation and management
+- User authentication
+- Real-time updates
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Other Platforms
+- Netlify
+- Railway
+- DigitalOcean App Platform
+
+## 📱 Mobile Optimization
+
+- Touch-friendly interface
+- Offline functionality
+- Push notifications (future)
+- App-like experience
+
+## 🔒 Security
+
+- Row Level Security (RLS)
+- Input validation with Zod
+- XSS protection
+- CSRF protection
+- Secure authentication
+
+## 🧪 Testing
+
+```bash
+# Run tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+## 📈 Performance
+
+- Service worker caching
+- Image optimization
+- Code splitting
+- Lazy loading
+- Optimized bundle size
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue on GitHub
+- Contact: support@engracedsmile.com
+
+## 🗺️ Roadmap
+
+### Phase 1 (Current)
+- ✅ Basic booking system
+- ✅ User authentication
+- ✅ Admin dashboard
+- ✅ PWA functionality
+
+### Phase 2 (Future)
+- [ ] Payment integration
+- [ ] Push notifications
+- [ ] Real-time tracking
+- [ ] Mobile app (React Native)
+
+### Phase 3 (Future)
+- [ ] Advanced analytics
+- [ ] Multi-language support
+- [ ] API for third-party integration
+- [ ] Advanced reporting
+
+---
+
+Built with ❤️ for safe and comfortable travel across Nigeria.
