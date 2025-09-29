@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <Bus className="h-8 w-8 text-blue-400" />
-              <span className="text-xl font-bold">EngracedSmile Transport</span>
+              <span className="text-xl font-bold font-poppins">EngracedSmile Transport</span>
             </div>
             <p className="text-gray-300 mb-4">
               Your trusted partner for interstate transportation across Nigeria. 
@@ -34,7 +34,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4 font-poppins">Quick Links</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="text-gray-300 hover:text-white transition-colors">
@@ -61,7 +61,7 @@ export default function Footer() {
 
           {/* Popular Routes */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Popular Routes</h3>
+            <h3 className="text-lg font-semibold mb-4 font-poppins">Popular Routes</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/book?from=Lagos&to=Abuja" className="text-gray-300 hover:text-white transition-colors">

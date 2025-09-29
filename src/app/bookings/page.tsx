@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
-import CustomerLayout from '@/components/layout/CustomerLayout'
+import PWALayout from '@/components/layout/PWALayout'
 
 interface Booking {
   id: string
@@ -118,19 +118,19 @@ export default function BookingsPage() {
 
   if (loading) {
     return (
-      <CustomerLayout>
+      <PWALayout>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading your bookings...</p>
           </div>
         </div>
-      </CustomerLayout>
+      </PWALayout>
     )
   }
 
   return (
-    <CustomerLayout>
+    <PWALayout>
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Bookings</h1>
@@ -245,6 +245,6 @@ export default function BookingsPage() {
           </div>
         )}
       </div>
-    </CustomerLayout>
+    </PWALayout>
   )
 }

@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useBookingStore } from '@/lib/stores/booking'
 import { supabase } from '@/lib/supabase'
-import CustomerLayout from '@/components/layout/CustomerLayout'
+import PWALayout from '@/components/layout/PWALayout'
 
 interface Trip {
   id: string
@@ -155,7 +155,7 @@ export default function BookPage() {
 
   if (!from || !to || !date) {
     return (
-      <CustomerLayout>
+      <PWALayout>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <Card>
             <CardContent className="p-8 text-center">
@@ -169,12 +169,12 @@ export default function BookPage() {
             </CardContent>
           </Card>
         </div>
-      </CustomerLayout>
+      </PWALayout>
     )
   }
 
   return (
-    <CustomerLayout>
+    <PWALayout>
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Search Summary */}
         <Card className="mb-8">
@@ -439,6 +439,6 @@ export default function BookPage() {
           </div>
         )}
       </div>
-    </CustomerLayout>
+    </PWALayout>
   )
 }

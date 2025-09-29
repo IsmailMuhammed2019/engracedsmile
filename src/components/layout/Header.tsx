@@ -67,7 +67,7 @@ export default function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-primary hover:bg-primary/10 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer border border-transparent hover:border-primary/20"
+                className="text-gray-700 hover:text-primary hover:bg-primary/10 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer border border-transparent hover:border-primary/20 font-poppins"
               >
                 {item.name}
               </Link>
@@ -79,7 +79,7 @@ export default function Header() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="text-gray-700 hover:text-primary hover:bg-primary/10 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer border border-transparent hover:border-primary/20"
+                    className="text-gray-700 hover:text-primary hover:bg-primary/10 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer border border-transparent hover:border-primary/20 font-poppins"
                   >
                     {item.name}
                   </Link>
@@ -167,7 +167,7 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 hover:text-primary hover:bg-primary/10 block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 cursor-pointer border border-transparent hover:border-primary/20"
+                  className="text-gray-700 hover:text-primary hover:bg-primary/10 block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 cursor-pointer border border-transparent hover:border-primary/20 font-poppins"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -180,7 +180,7 @@ export default function Header() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className="text-gray-700 hover:text-primary hover:bg-primary/10 block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 cursor-pointer border border-transparent hover:border-primary/20"
+                      className="text-gray-700 hover:text-primary hover:bg-primary/10 block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 cursor-pointer border border-transparent hover:border-primary/20 font-poppins"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.name}

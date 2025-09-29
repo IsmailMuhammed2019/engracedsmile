@@ -11,7 +11,7 @@ interface PWALayoutProps {
 
 export default function PWALayout({ children }: PWALayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col font-sans">
       <Header />
       <main className="flex-1">
         {children}
